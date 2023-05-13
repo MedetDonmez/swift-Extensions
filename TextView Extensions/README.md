@@ -6,7 +6,7 @@ An extension for Text View to make part of it clickable.
 ```swift
 
 
-textView.setTappableText(text1: "Clickable Part", text2: " not clickable part", font1: UIFont.italicSystemFont(ofSize: 35), font2: UIFont.boldSystemFont(ofSize: 25), color1: .red, color2: .blue) {
+textView.setTappableText(text1: "Clickable Part", text2: " not clickable part", font1: UIFont.italicSystemFont(ofSize: 18), font2: UIFont.boldSystemFont(ofSize: 12), color1: .red, color2: .blue) {
     //add any function here
     print("text1 tapped")
         }
