@@ -12,7 +12,7 @@ textView.setTappableText(text1: "Clickable Part", text2: " not clickable part", 
         }
 ```
 
-## Screenshots
+## Output
 
 <img src="https://github.com/MedetDonmez/swift-Extensions/assets/76966943/83d77046-031b-4db4-9c6b-7890327a21df">
 
