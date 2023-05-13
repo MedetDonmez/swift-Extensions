@@ -11,6 +11,11 @@ textView.setTappableText(text1: "Clickable Part", text2: " not clickable part", 
     print("text1 tapped")
         }
 ```
+
+## Screenshots
+
+src="https://github.com/MedetDonmez/swift-Extensions/assets/76966943/83d77046-031b-4db4-9c6b-7890327a21df">
+m/468x300?text=App+Screenshot+Here)
 ## Extension Code
 
 ```swift
@@ -92,7 +97,5 @@ extension UITextView {
 ```
 
 
-## Screenshots
 
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
 
