@@ -1,2 +1,2 @@
-# swift-Extensions
-swift extensions
+# Swift-Extensions
+Useful swift extensions to make life easier :)
