@@ -20,80 +20,74 @@ textView.setTappableText(text1: "Clickable Part", text2: " not clickable part", 
 
 ```swift
 import UIKit
-
-extension UITextView {
-
-    func setTappableText(text1: String, text2: String, font1: UIFont, font2: UIFont, color1: UIColor, color2: UIColor, onTap: (() -> Void)?) {
-
-        // Create the link attributes
-        let linkAttributes: [NSAttributedString.Key: Any] = [
-            .font: font1,
-            .foregroundColor: color1,
-            .underlineStyle: NSUnderlineStyle.single.rawValue
-        ]
-        
-        linkTextAttributes = linkAttributes
-
-        // Create the normal attributes for text2
-        let normalAttributes: [NSAttributedString.Key: Any] = [
-            .font: font2,
-            .foregroundColor: color2
-        ]
-
-        // Combine text1 and text2 into a single attributed string
-        let attributedString = NSMutableAttributedString(string: text1 + text2, attributes: normalAttributes)
-
-        // Apply the link attributes to text1
-        let text1Range = (attributedString.string as NSString).range(of: text1)
-        attributedString.addAttributes(linkAttributes, range: text1Range)
-
-        // Make text1 tappable
-        attributedString.addAttribute(.link, value: "tappedText1", range: text1Range)
-
-        // Set the attributed text
-        self.attributedText = attributedString
-
-        // Enable user interaction
-        self.isUserInteractionEnabled = true
-
-        // Add tap gesture recognizer
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.textViewTapped(_:)))
-        self.addGestureRecognizer(tapGestureRecognizer)
-
-        // Save the onTap closure
-        self.onTap = onTap
+extension UITextView: UITextViewDelegate {
+  func setTappableText(text1: String, fullText: String, font1: UIFont, font2: UIFont, color1: UIColor, color2: UIColor, onTap: @escaping () -> Void) {
+    // Create the normal attributes for fullText
+    let normalAttributes: [NSAttributedString.Key: Any] = [
+      .font: font2,
+      .foregroundColor: color2
+    ]
+    // Create the link attributes for text1
+    let linkAttributes: [NSAttributedString.Key: Any] = [
+      .font: font1,
+      .foregroundColor: color1,
+      .underlineStyle: NSUnderlineStyle.single.rawValue
+    ]
+    // Combine fullText into a single attributed string
+    let attributedString = NSMutableAttributedString(string: fullText, attributes: normalAttributes)
+    // Search for text1 in fullText
+    let ranges = self.ranges(of: text1, in: fullText)
+    // Apply the link attributes to each instance of text1
+    for range in ranges {
+      attributedString.addAttributes(linkAttributes, range: range)
+      attributedString.addAttribute(.link, value: "tappedText1://", range: range)
     }
-
-    private struct AssociatedKeys {
-        static var onTap = "onTap"
+    // Set the attributed text
+    self.attributedText = attributedString
+    self.linkTextAttributes = [
+      .foregroundColor: color1,
+    ]
+    // Enable user interaction
+    self.isUserInteractionEnabled = true
+    // Save the onTap closure
+    self.onTap = onTap
+    // Set the delegate to self
+    self.delegate = self
+  }
+  private func ranges(of substring: String, in string: String) -> [NSRange] {
+    var ranges = [NSRange]()
+    var range = (string as NSString).range(of: substring)
+    while range.location != NSNotFound {
+      ranges.append(range)
+      if NSMaxRange(range) + 1 < string.count {
+        let newStartLocation = NSMaxRange(range)
+        let substringRange = NSRange(location: newStartLocation, length: string.count - newStartLocation)
+        range = (string as NSString).range(of: substring, options: [], range: substringRange)
+      } else {
+        break
+      }
     }
-
-    private var onTap: (() -> Void)? {
-        get {
-            return objc_getAssociatedObject(self, &AssociatedKeys.onTap) as? () -> Void
-        }
-        set {
-            objc_setAssociatedObject(self, &AssociatedKeys.onTap, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
+    return ranges
+  }
+  private struct AssociatedKeys {
+    static var onTap = "onTap"
+  }
+  private var onTap: (() -> Void)? {
+    get {
+      return objc_getAssociatedObject(self, &AssociatedKeys.onTap) as? () -> Void
     }
-
-    @objc private func textViewTapped(_ sender: UITapGestureRecognizer) {
-        guard let onTap = onTap else { return }
-
-        // Get the tapped character index
-        let layoutManager = self.layoutManager
-        var location = sender.location(in: self)
-        location.x -= self.textContainerInset.left
-        location.y -= self.textContainerInset.top
-        let characterIndex = layoutManager.characterIndex(for: location, in: self.textContainer, fractionOfDistanceBetweenInsertionPoints: nil)
-
-        // Check if the tapped character is in the text1 range
-        if let range = (self.attributedText.string as NSString?)?.range(of: self.attributedText.string), range.contains(characterIndex), self.attributedText.attribute(.link, at: characterIndex, effectiveRange: nil) != nil {
-            onTap()
-        }
+    set {
+      objc_setAssociatedObject(self, &AssociatedKeys.onTap, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
+  }
+  public func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
+    if URL.scheme == "tappedText1" {
+      self.onTap?()
+      return false
+    }
+    return true
+  }
 }
-
 ```
 
 
